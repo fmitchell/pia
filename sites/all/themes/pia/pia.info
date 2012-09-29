@@ -1,0 +1,28 @@
+name = PIA
+version = 1.0
+core = 7.x
+engine = phptemplate
+stylesheets[all][] = css/all.css
+
+scripts[] = js/jquery-1.5.min.js
+scripts[] = js/jquery.main.js
+
+regions[page_top] = Page top
+regions[slogan] = Slogan
+regions[header] = Header
+regions[before_title] = Before title
+regions[after_title] = After title
+regions[help] = Help
+regions[before_content] = Before content
+regions[content] = Content
+regions[after_content] = After content
+regions[right_nav_types] = Right nav by content types
+regions[right_nav] = Right nav
+regions[right] = Right
+regions[footer] = Footer
+regions[home_gallery] = Home gallery
+regions[home_right] = Home right
+regions[home_content] = Home content blocks
+regions[social] = Social
+regions[news] = News
+regions[page_bottom] = Page bottom

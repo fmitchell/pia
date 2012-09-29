@@ -1,0 +1,4 @@
+.buttons li {
+	display:inline;
+	z-index:1;
+}
