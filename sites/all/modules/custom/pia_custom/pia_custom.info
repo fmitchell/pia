@@ -1,0 +1,4 @@
+name = "PIA Custom"
+description = Custom functionality for PIA.
+core = 7.x
+package = PIA

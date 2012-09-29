@@ -1,0 +1,155 @@
+<?php
+/**
+ * @file
+ *   Custom functionality for PIA
+ */
+
+/**
+ * Implements hook_block_info().
+ *
+ * @return array
+ */
+function pia_custom_block_info() {
+  $blocks = array();
+  $blocks['kintera_donate_header'] = array(
+    'info' => t('Kintera: Donate (Header)'),
+  );
+  $blocks['kintera_donate_footer'] = array(
+    'info' => t('Kintera: Donate (Footer)'),
+  );
+  $blocks['kintera_newsletter'] = array(
+    'info' => t('Kintera: Newsletter'),
+  );
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ *
+ * @param string $delta
+ * @return array
+ */
+function pia_custom_block_view($delta = '') {
+  $block = array();
+  switch ($delta) {
+    case 'kintera_donate_header':
+      $block['subject'] = NULL;
+      $block['content'] = pia_custom_kintera_donate_button('header');
+      break;
+    case 'kintera_donate_footer':
+      $block['subject'] = NULL;
+      $block['content'] = pia_custom_kintera_donate_button('footer');
+      break;
+    case 'kintera_newsletter':
+      $block['subject'] = NULL;
+      $block['content'] = pia_custom_kintera_donate_button('newsletter');
+      break;
+  }
+  return $block;
+}
+
+/**
+ * Donate buttons
+ *
+ * @param $location
+ * @return string
+ */
+function pia_custom_kintera_donate_button($location) {
+  $output = '';
+  switch ($location) {
+    case 'header':
+      $output = '<div class="box">';
+      $options = pia_custom_grab_kintera_code('DONATE1');
+      $output .= l('<span>DONATE</span>', 'http://www.partnershipsinaction.org/content/donate', array('html' => TRUE) + $options);
+      $output .= '</div>';
+      break;
+    case 'footer':
+      $options = pia_custom_grab_kintera_code('DONATE2');
+      $output = l('DONATE', 'http://www.partnershipsinaction.org/content/donate', array('attributes' => array('class' => array('logo-donate'))) + $options);
+      break;
+    case 'newsletter':
+      $defaults = array('ievent' => '181868','en' => 'joJFKIOsG9LAKQMyGaKAJSOAJmJMISNtEdLPLXNCLoIZF',);
+      $options = pia_custom_grab_kintera_code('NEWSLETTER');
+      if (isset($options['query'])) {
+        $options['query'] += $defaults;
+      }
+      else {
+        $options = $defaults;
+      }
+      $output = <<<EOD
+<div class="add-box">
+	<div class="image"><img src="/sites/default/files/images/newsletter thumbnail.jpg" alt="image description" width="84" height="75" /></div>
+	<div class="holder">
+		<h4>STAY CONNECTED</h4>
+		<div class="frame">
+			<p>With our weekly e-news and monthly e-newsletters.</p>
+		</div>
+		<div class="panel">
+			<a href="http://www.partnershipsinaction.org/empowered">View Empowered</a>
+EOD;
+			$output .= l('SIGN UP', 'http://www.kintera.org/AutoGen/Newsletter/SubscriptionForm.asp',
+        array(
+          'attributes' => array(
+            'class' => array(
+              'button',
+            ),
+            'target' => '_blank',
+          ),
+        ) + $options);
+      $output .= <<<EOD
+		</div>
+	</div>
+</div>
+EOD;
+      break;
+  }
+  return $output;
+}
+
+/**
+ * Grab code value from kintera code field.
+ *
+ * @return array
+ */
+function pia_custom_grab_kintera_code($context) {
+  $object = menu_get_object();
+  if (!isset($object)) {
+    $object = menu_get_object('taxonomy_term', 2);
+    if (isset($object)) {
+      $codes = field_get_items('taxonomy_term', $object, 'field_kintera_codes');
+    }
+  }
+  else {
+    $codes = field_get_items('node', $object, 'field_kintera_codes');
+  }
+  if (!empty($codes)) {
+    $codes = reset($codes);
+    $codes = $codes['value'];
+    $code = pia_custom_parse_kintera_code($codes, $context);
+  }
+  return isset($code) ? array('query' => array('msource' => $code)) : array();
+}
+
+/**
+ * Find kintera code from string
+ *
+ * @param $string
+ *   The value of the kintera field.
+ * @param $context
+ *   Which code we want.
+ *
+ * @return string
+ *   The code.
+ */
+function pia_custom_parse_kintera_code($string, $context) {
+  $code = NULL;
+  $codes = explode("\r\n", $string);
+  foreach ($codes as $possible) {
+    $pair = explode('|', $possible);
+    if ($pair[0] == $context) {
+      $code = $pair[1];
+      break;
+    }
+  }
+  return $code;
+}
