@@ -1,0 +1,7 @@
+docroot/sites/*/files/
+docroot/sites/*/settings.php
+docroot/sites/*/modules/local/
+docroot/sites/*/themes/local
+.idea/
+tags
+.DS_Store
