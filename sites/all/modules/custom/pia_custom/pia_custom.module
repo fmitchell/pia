@@ -4,6 +4,29 @@
  *   Custom functionality for PIA
  */
 
+function pia_custom_menu() {
+  $items = array();
+  $items['admin/config/pia'] = array(
+    'title' => 'PIA Custom Settings',
+    'description' => 'This is the parent item',
+    'position' => 'left',
+    'weight' => -100,
+    'page callback' => 'system_admin_menu_block_page',
+    'access arguments' => array('administer site configuration'),
+    'file' => 'system.admin.inc',
+    'file path' => drupal_get_path('module', 'system'),
+  );
+  $items['admin/config/pia/kintera-home'] = array(
+    'title' => 'Kintera Codes: Homepage',
+    'description' => 'Configure the Kintera codes for the homepage',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('pia_custom_kintera_homepage_form'),
+    'access arguments' => array('administer site configuration'),
+  );
+
+  return $items;
+}
+
 /**
  * Implements hook_block_info().
  *
@@ -19,6 +42,9 @@ function pia_custom_block_info() {
   );
   $blocks['kintera_newsletter'] = array(
     'info' => t('Kintera: Newsletter'),
+  );
+  $blocks['kintera_newsletter_homepage'] = array(
+    'info' => t('Kintera: Newsletter (homepage)'),
   );
   return $blocks;
 }
@@ -41,6 +67,7 @@ function pia_custom_block_view($delta = '') {
       $block['content'] = pia_custom_kintera_donate_button('footer');
       break;
     case 'kintera_newsletter':
+    case 'kintera_newsletter_homepage':
       $block['subject'] = NULL;
       $block['content'] = pia_custom_kintera_donate_button('newsletter');
       break;
@@ -118,6 +145,13 @@ function pia_custom_grab_kintera_code($context) {
     if (isset($object)) {
       $codes = field_get_items('taxonomy_term', $object, 'field_kintera_codes');
     }
+    else if (drupal_is_front_page()) {
+      $codes = array(
+        array(
+          'value' => variable_get('pia_custom_kintera_homepage'),
+        ),
+      );
+    }
   }
   else {
     $codes = field_get_items('node', $object, 'field_kintera_codes');
@@ -152,4 +186,15 @@ function pia_custom_parse_kintera_code($string, $context) {
     }
   }
   return $code;
+}
+
+function pia_custom_kintera_homepage_form($form) {
+  $form['pia_custom_kintera_homepage'] = array(
+    '#title' => t('Homepage Kintera Codes'),
+    '#type' => 'textarea',
+    '#default_value' => variable_get('pia_custom_kintera_homepage'),
+    '#description' => 'Ex:<br />NEWSLETTER|NLEAA<br />DONATE1|DO1EAA<br />DONATE2|DO2EAA',
+  );
+
+  return system_settings_form($form);
 }
