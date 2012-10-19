@@ -101,7 +101,7 @@ function pia_custom_kintera_donate_button($location) {
         $options['query'] += $defaults;
       }
       else {
-        $options = $defaults;
+        $options['query'] = $defaults;
       }
       $output = <<<EOD
 <div class="add-box">
